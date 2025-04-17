@@ -26,4 +26,7 @@ interface ProductDao {
 
     @Query("DELETE FROM Product")
     suspend fun clearAll()
+
+    @Query("SELECT * FROM Product WHERE title LIKE '%' || :query || '%' ORDER BY title ASC")
+    fun getProductPagingBySearch(query: String): PagingSource<Int, Product>
 }

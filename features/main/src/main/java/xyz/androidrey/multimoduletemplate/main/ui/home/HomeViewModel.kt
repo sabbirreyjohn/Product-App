@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import xyz.androidrey.multimoduletemplate.main.domain.repository.DataRepository
 import xyz.androidrey.multimoduletemplate.main.data.entity.Product
@@ -32,22 +33,33 @@ class HomeViewModel @Inject constructor(
     private val _sortOption = MutableStateFlow(SortOption.TITLE)
     val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
+
     fun updateSort(option: SortOption) {
         _sortOption.value = option
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getSortedPagingFlow(): Flow<PagingData<Product>> {
-        return sortOption.flatMapLatest { sort ->
-            remoteMediator.currentSortOption = sort
+        return combine(sortOption, searchQuery) { sort, query ->
+            sort to query
+        }.flatMapLatest { (sort, query) ->
             Pager(
                 config = PagingConfig(pageSize = 20),
-                remoteMediator = remoteMediator,
                 pagingSourceFactory = {
-                    when (sort) {
-                        SortOption.TITLE -> database.productDao.getProductPagingSortedByTitle()
-                        SortOption.PRICE -> database.productDao.getProductPagingSortedByPrice()
-                        SortOption.RATING -> database.productDao.getProductPagingSortedByRating()
+                    if (query.isNotBlank()) {
+                        database.productDao.getProductPagingBySearch(query)
+                    } else {
+                        when (sort) {
+                            SortOption.TITLE -> database.productDao.getProductPagingSortedByTitle()
+                            SortOption.PRICE -> database.productDao.getProductPagingSortedByPrice()
+                            SortOption.RATING -> database.productDao.getProductPagingSortedByRating()
+                        }
                     }
                 }
             ).flow

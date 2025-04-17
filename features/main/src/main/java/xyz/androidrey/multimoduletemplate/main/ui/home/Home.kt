@@ -7,6 +7,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,19 +71,21 @@ fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         AppBar("Products")
-        Home(products = productsPagingItem, selectedSort = sort) {
-            viewModel.updateSort(it)
-        }
+        Home(
+            products = productsPagingItem,
+            selectedSort = sort,
+            sortItemClicked = { viewModel.updateSort(it) },
+            searchItemChanged = { viewModel.updateSearchQuery(it) })
     }
 }
-
 
 
 @Composable
 fun Home(
     products: LazyPagingItems<Product>,
     selectedSort: SortOption,
-    sortItemClicked: (SortOption) -> Unit
+    sortItemClicked: (SortOption) -> Unit,
+    searchItemChanged: (String) -> Unit,
 ) {
     val isRefreshing = products.loadState.refresh is LoadState.Loading
     val isAppending = products.loadState.append is LoadState.Loading
@@ -89,7 +93,26 @@ fun Home(
 
     Column {
         if (!isInitialLoading) {
-            SortDropdown(selectedSort) { sortItemClicked(it) }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SortDropdown(
+                    selected = selectedSort,
+                    onSortChange = sortItemClicked,
+                    modifier = Modifier.weight(1f)
+                )
+
+                SearchTextField(
+                    modifier = Modifier
+                        .weight(2f)
+                        .padding(start = 8.dp)
+                ) {
+                    searchItemChanged(it)
+                }
+            }
         }
 
         if (isInitialLoading) {
@@ -126,12 +149,61 @@ fun Home(
 }
 
 @Composable
+fun SortDropdown(
+    selected: SortOption,
+    onSortChange: (SortOption) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        Button(onClick = { expanded = true }) {
+            Text("Sort: ${selected.label}")
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            SortOption.entries.forEach {
+                DropdownMenuItem(
+                    text = { Text(it.label) },
+                    onClick = {
+                        onSortChange(it)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SearchTextField(
+    modifier: Modifier = Modifier,
+    onSearchChange: (String) -> Unit
+) {
+
+    var searchText by remember { mutableStateOf("") }
+
+    TextField(
+        value = searchText,
+        onValueChange = {
+            searchText = it
+            onSearchChange(it) },
+        placeholder = {
+            Text("Search")
+        },
+        modifier = modifier,
+        singleLine = true
+    )
+}
+
+@Composable
 fun SortDropdown(selected: SortOption, onSortChange: (SortOption) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .padding(8.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
         Button(onClick = { expanded = true }) {
             Text("Sort by: ${selected.label}")
         }
