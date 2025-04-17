@@ -12,6 +12,7 @@ A scalable, modern Android application built using a **multi-module architecture
 - 🔌 Ktor for networking
 - 💉 Hilt for dependency injection
 - 🗃 Room for local database storage
+  - App caches data for offline use
 - 🔄 Paging 3 for efficient data loading
 - 🔁 Kotlin Coroutines and Flow for smooth, asynchronous operations
 - 🧪 Instrumented test for Room DB (check `main > androidTest > TheDatabaseTest.kt`)
@@ -38,8 +39,8 @@ A scalable, modern Android application built using a **multi-module architecture
 
 ### 1. Clone the project
 ### 2. Create local.properties
-Add the following line in the local.properties file in the root directory to avoid compile errors:
-base_url=dummyjson.com
+- Add the following line in the local.properties file in the root directory to avoid compile errors:
+- base_url=dummyjson.com
 
 ### Build and run
 
