@@ -42,7 +42,7 @@ class UserRemoteMediator @Inject internal constructor(
             }
             val queryParams = mapOf(
                 "skip" to loadKey.toString(),
-                "limit" to "20",
+                "limit" to "5",
                 "sort" to currentSortOption.name.lowercase() // send sort key
             )
 
@@ -63,8 +63,11 @@ class UserRemoteMediator @Inject internal constructor(
                         }
                         database.productDao.insertAll(products.result.products)
                     }
-                    MediatorResult.Success(endOfPaginationReached = products.result.products.size < state.config.pageSize)
-                }
+
+                    val isEndReached = products.result.products.isEmpty() ||
+                            (products.result.skip + products.result.products.size >= products.result.total)
+
+                    MediatorResult.Success(endOfPaginationReached = isEndReached) }
             }
         } catch (e: Exception) {
             MediatorResult.Error(e)
