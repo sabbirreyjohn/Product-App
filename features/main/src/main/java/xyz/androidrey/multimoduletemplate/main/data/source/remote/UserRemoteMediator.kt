@@ -43,7 +43,8 @@ class UserRemoteMediator @Inject internal constructor(
             val queryParams = mapOf(
                 "skip" to loadKey.toString(),
                 "limit" to "5",
-                "sort" to currentSortOption.name.lowercase() // send sort key
+                "sortBy" to currentSortOption.name.lowercase(),
+                "order" to "asc"
             )
 
             val products = requestHandler.get<ProductResponse>(
