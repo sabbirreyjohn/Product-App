@@ -51,6 +51,7 @@ class HomeViewModel @Inject constructor(
         }.flatMapLatest { (sort, query) ->
             Pager(
                 config = PagingConfig(pageSize = 20),
+                remoteMediator = remoteMediator,
                 pagingSourceFactory = {
                     if (query.isNotBlank()) {
                         database.productDao.getProductPagingBySearch(query)
