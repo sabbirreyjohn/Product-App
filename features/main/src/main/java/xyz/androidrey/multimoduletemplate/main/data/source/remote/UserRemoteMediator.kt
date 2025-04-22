@@ -37,8 +37,7 @@ class UserRemoteMediator @Inject internal constructor(
                 )
 
                 LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull()
-                    lastItem?.id ?: 0
+                    state.pages.sumOf { it.data.size }
                 }
             }
             val queryParams = mapOf(

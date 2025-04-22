@@ -49,6 +49,7 @@ class HomeViewModel @Inject constructor(
         return combine(sortOption, searchQuery) { sort, query ->
             sort to query
         }.flatMapLatest { (sort, query) ->
+            remoteMediator.currentSortOption = sort
             Pager(
                 config = PagingConfig(pageSize = 20),
                 remoteMediator = remoteMediator,
