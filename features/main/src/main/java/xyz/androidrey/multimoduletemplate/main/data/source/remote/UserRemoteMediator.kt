@@ -42,7 +42,7 @@ class UserRemoteMediator @Inject internal constructor(
             }
             val queryParams = mapOf(
                 "skip" to loadKey.toString(),
-                "limit" to "5",
+                "limit" to "20",
                 "sortBy" to currentSortOption.name.lowercase(),
                 "order" to "asc"
             )
